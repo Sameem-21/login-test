@@ -40,7 +40,7 @@ module "instances" {
   security_group_id = [module.security.sam_sec_group] # Replace with your security group ID
   instance_count    = 1
   subnet_id         = module.network.subnet_id # Replace with your subnet ID
-  name_offset       = 0
+  name_offset       = 1
   name_instance =  "sam_web_application"
   #installing Apache and writing this sample html login page in /var/www/html folder#
   user_data = <<-EOF
