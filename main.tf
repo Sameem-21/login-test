@@ -41,7 +41,7 @@ module "instances" {
   instance_count    = 1
   subnet_id         = module.network.subnet_id # Replace with your subnet ID
   name_offset       = 0
-  name_instance =  "sam_web_instance"
+  name_instance =  "sam_web_application"
   #installing Apache and writing this sample html login page in /var/www/html folder#
   user_data = <<-EOF
   #!/bin/bash
