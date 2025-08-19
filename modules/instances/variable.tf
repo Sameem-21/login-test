@@ -42,3 +42,7 @@ variable security_group_id {
    type        = string
    #default     = "sam-instance"
  }
+ variable aws_iam_instance_profile {
+   description = "The IAM instance profile to associate with the instance"
+   type        = string
+ }

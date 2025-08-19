@@ -11,6 +11,8 @@ terraform {
 provider "aws" {
   region = "ap-south-1"
 }
+# S3 bucket creation
+
 
 resource "aws_instance" "sam_instance" {
 count        = var.instance_count
@@ -18,6 +20,7 @@ count        = var.instance_count
   instance_type = var.instance_type # Replace with your instance type
   key_name      = var.key_name
   subnet_id     = var.subnet_id
+  iam_instance_profile = var.aws_iam_instance_profile
   security_groups = var.security_group_id
    associate_public_ip_address = true
    user_data = <<-EOF

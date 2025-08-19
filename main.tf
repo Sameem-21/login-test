@@ -31,6 +31,10 @@ module "security" {
 module "ami" {
   source = "./modules/ami"
 }
+module "s3bucket" {
+  source = "./modules/s3bucket"
+  
+} 
 
 module "instances" {
   source            = "./modules/instances"
@@ -39,6 +43,7 @@ module "instances" {
   key_name          = "sam-key-pair"                  # Replace with your key pair name
   security_group_id = [module.security.sam_sec_group] # Replace with your security group ID
   instance_count    = 1
+ aws_iam_instance_profile = module.aws_iam_instance_profile.sam_ec2_instance_profile.name # instance profile created above
   subnet_id         = module.network.subnet_id # Replace with your subnet ID
   name_offset       = 0
   name_instance =  "sam_web_application"
