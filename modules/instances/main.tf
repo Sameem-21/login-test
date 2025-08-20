@@ -30,6 +30,7 @@ count        = var.instance_count
   # Update and install Apache with SSL support
   apt update -y
   apt install -y apache2 openssl ssl-cert
+   sudo apt install awscli 
   ${var.user_data}
   EOF
 

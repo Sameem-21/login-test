@@ -43,10 +43,10 @@ module "instances" {
   key_name          = "sam-key-pair"                  # Replace with your key pair name
   security_group_id = [module.security.sam_sec_group] # Replace with your security group ID
   instance_count    = 1
- aws_iam_instance_profile = module.aws_iam_instance_profile.sam_ec2_instance_profile.name # instance profile created above
+  iam_instance_profile = module.s3bucket.Sam_ec2_instance_profile # instance profile created above
   subnet_id         = module.network.subnet_id # Replace with your subnet ID
   name_offset       = 0
-  name_instance =  "sam_web_application"
+  name_instance =  "sam_web_application_new"
   #installing Apache and writing this sample html login page in /var/www/html folder#
   user_data = <<-EOF
   #!/bin/bash
@@ -72,7 +72,7 @@ module "instances" {
         height: 100vh;
       }
       .login-container {
-        background-color: #fff;
+        background-color: #ffffffff;
         padding: 30px;
         border-radius: 8px;
         box-shadow: 0 0 10px rgba(0,0,0,0.1);

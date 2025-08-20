@@ -1,6 +1,6 @@
 #creating IAM role for EC2 instance
-resource "aws_iam_role" "sam_ec2_role" {
-  name = "sam_ec2_role"
+resource "aws_iam_role" "sam_ec2_role_1" {
+  name = "sam_ec2_role_1"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -17,12 +17,12 @@ resource "aws_iam_role" "sam_ec2_role" {
 
 #attaching policy to IAM role
 resource "aws_iam_role_policy_attachment" "sam_ec2_policy_attachment" {
-  role       = aws_iam_role.sam_ec2_role.name #role we created above 
+  role       = aws_iam_role.sam_ec2_role_1.name #role we created above 
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 }
 
 #creating IAM instance profile
 resource "aws_iam_instance_profile" "sam_ec2_instance_profile" {
   name = "sam_ec2_instance_profile"
-  role = aws_iam_role.sam_ec2_role.name
+  role = aws_iam_role.sam_ec2_role_1.name
 }
