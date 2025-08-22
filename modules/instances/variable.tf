@@ -33,10 +33,15 @@ variable security_group_id {
     type        = string
     default     = ""
  }
- variable user_data {
-   description = "User data script to run on instance launch"
-   type        = string
- }
+ variable "subnet_ids" {
+  type        = list(string)
+  description = "List of subnet IDs for DB subnet group"
+}
+
+  variable "login_page_html" {
+  description = "HTML content for EC2 login page"
+  type        = string
+}
  variable name_instance {
    description = "Base name for the instance"
    type        = string
@@ -46,3 +51,7 @@ variable security_group_id {
    description = "The IAM instance profile to associate with the instance"
    type        = string
  }
+#  variable vpc_id {
+#   description = "The ID of the VPC where the security group will be created"
+#   type        = string
+# }

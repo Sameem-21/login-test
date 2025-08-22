@@ -1,6 +1,8 @@
 #creating VPC network
 resource "aws_vpc" "Sam_auto_vpc" {
   cidr_block = "10.0.0.0/16"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
   tags = {
     Name = "Sam_auto_vpc"
   }
@@ -14,8 +16,19 @@ resource "aws_subnet" "Sam_subnet_1" {
     tags = {
         Name = "${var.name_prefix}_Sam_subnet_1"
     }
+
 }
-#creating internet gateway
+resource "aws_subnet" "Sam_subnet_2" {
+ vpc_id            = aws_vpc.Sam_auto_vpc.id
+  cidr_block        = "10.0.2.0/24"
+  availability_zone = "ap-south-1b"
+    tags = {
+        Name = "${var.name_prefix}_Sam_subnet_2"
+    }
+
+}
+
+
 resource "aws_internet_gateway" "Sam_igw" {
   vpc_id = aws_vpc.Sam_auto_vpc.id
   tags = {

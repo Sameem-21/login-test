@@ -48,6 +48,15 @@ resource "aws_vpc_security_group_ingress_rule" "allow_RDP_ipv4" {
     to_port     = 3389
     ip_protocol    = "tcp"
 }
+#creating ingress rule for port 1433 for mssql access
+resource "aws_vpc_security_group_ingress_rule" "allow_mssql_ipv4" {
+  security_group_id = aws_security_group.sam_sec_group.id
+  cidr_ipv4         = "0.0.0.0/0"
+ 
+    from_port   = 1433
+    to_port     = 1433
+    ip_protocol    = "tcp"
+}
 resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4" {
   security_group_id = aws_security_group.sam_sec_group.id
   cidr_ipv4         = "0.0.0.0/0"
