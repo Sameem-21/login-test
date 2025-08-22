@@ -38,10 +38,29 @@ variable security_group_id {
   description = "List of subnet IDs for DB subnet group"
 }
 
-  variable "login_page_html" {
+  variable "login_page" {
   description = "HTML content for EC2 login page"
   type        = string
 }
+variable "db_username" {
+  type        = string
+  description = "Database username"
+}
+
+variable "db_password" {
+  type        = string
+  description = "Database password"
+}
+
+variable "db_host" {
+  type        = string
+  description = "RDS endpoint"
+}
+
+# variable "db_name" {
+#   type        = string
+#   description = "Database name"
+# }
  variable name_instance {
    description = "Base name for the instance"
    type        = string

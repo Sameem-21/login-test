@@ -24,7 +24,7 @@ resource "aws_db_subnet_group" "Sam_private_subnet" {
 }
 
 resource aws_db_instance "sam_db_instance" {
-   identifier         = "sam-db-instance"
+   identifier         = "sam-db-instance-new-1"
    allocated_storage  = 20
    engine             = "sqlserver-ex"
    engine_version     = "15.00"
@@ -51,7 +51,11 @@ count        = var.instance_count
   security_groups = var.security_group_id
    associate_public_ip_address = true
    user_data  = templatefile("${path.module}/scripts/user_data.sh", {
-    login_page = var.login_page_html
+    #login_page = var.login_page
+  username   = var.db_username
+  password   = var.db_password
+  db_host    = var.db_host
+  #db_name    = var.db_name
     
   })
 

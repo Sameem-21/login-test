@@ -33,26 +33,30 @@ module "ami" {
 }
 module "s3bucket" {
   source = "./modules/s3bucket"
-  
-} 
+
+}
 
 module "instances" {
-  source            = "./modules/instances"
-  ami_id            = module.ami.ami_id
-  instance_type     = "t3.micro"                      # Replace with your desired instance type
-  key_name          = "sam-key-pair"                  # Replace with your key pair name
-  security_group_id = [module.security.sam_sec_group] # Replace with your security group ID
-  instance_count    = 1
+  source               = "./modules/instances"
+  ami_id               = module.ami.ami_id
+  instance_type        = "t3.micro"                      # Replace with your desired instance type
+  key_name             = "sam-key-pair"                  # Replace with your key pair name
+  security_group_id    = [module.security.sam_sec_group] # Replace with your security group ID
+  instance_count       = 1
   iam_instance_profile = module.s3bucket.Sam_ec2_instance_profile # instance profile created above
-  subnet_id         = module.network.subnet_id# Replace with your subnet ID
-  name_offset       = 0
+  subnet_id            = module.network.subnet_id                 # Replace with your subnet ID
+  name_offset          = 0
   #vpc_id= module.network.vpc_id # VPC ID from the network module
-  subnet_ids = module.network.private_subnet_ids # Subnet IDs for DB subnet group
-  name_instance =  "sam_web_application_fullstack"
-  login_page_html   = file("${path.module}/templates/index.html")
+  subnet_ids    = module.network.private_subnet_ids # Subnet IDs for DB subnet group
+  name_instance = "sam_web_application_fullstack_new"
+  login_page    = file("${path.root}/templates/index.html") # HTML content for EC2 login page
+  db_username   = "admin"
+  db_password   = "Passw0rd!23"
+  db_host       = "sam-db-instance.cz8eomwyg3n0.ap-south-1.rds.amazonaws.com"
+  #db_name      = "sam"
 
 
- 
+
 
 }
 # modified files

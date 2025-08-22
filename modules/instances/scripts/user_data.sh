@@ -1,56 +1,79 @@
+# #!/bin/bash
+# exec > /var/log/user_data.log 2>&1
+# set -e
+
+# # Run SQL Server setup
+# bash D:\GITHUB_Folder\login-test\modules\instances\scripts\sql.sh
+
+# # Run Nginx setup
+# bash D:\GITHUB_Folder\login-test\modules\instances\scripts\nginx.sh
+
+# # Inject DB credentials into .env before Node.js setup
+# APP_DIR="/home/ubuntu/login-app"
+
+# cat <<EOF > $APP_DIR/.env
+# DB_USER=${username}
+# DB_PASS=${password}
+# DB_HOST=${db_host}
+# EOF
+
+# chown ubuntu:ubuntu $APP_DIR/.env
+# chmod 600 $APP_DIR/.env
+
+# echo ".env file created at $APP_DIR/.env"
+
+# # Now run Node.js setup
+# bash D:\GITHUB_Folder\login-test\modules\instances\scripts\node.sh
+
 #!/bin/bash
-set -e
 exec > /var/log/user_data.log 2>&1
-export DEBIAN_FRONTEND=noninteractive
+set -e
+set -x
 
-# Wait for network
-until curl -s https://packages.microsoft.com/keys/microsoft.asc; do
-  echo "Waiting for network..."
-  sleep 5
-done
-
-# Install Apache
-apt update -y
-apt install -y apache2
-
-# Inject login page
-cat <<EOT > /var/www/html/index.html
-${login_page}
-EOT
-systemctl restart apache2
+# Update system
+apt-get update -y
 
 # Install MSSQL tools
 curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
 curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list | tee /etc/apt/sources.list.d/mssql-release.list
-apt-get update
+apt-get update -y
 ACCEPT_EULA=Y apt-get install -y msodbcsql17 mssql-tools
-echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> /home/ubuntu/.bashrc
-source /home/ubuntu/.bashrc
 
-#######node js plus sql server installation
+# Add MSSQL tools to PATH
+echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> /etc/profile.d/mssql-tools.sh
+source /etc/profile.d/mssql-tools.sh
 
+# Install Node.js (v18)
+curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+apt-get install -y nodejs
 
+# Install Nginx
+apt-get install -y nginx
+systemctl enable nginx
+systemctl start nginx
 
-set -e
-exec > /var/log/user_data.log 2>&1
-export DEBIAN_FRONTEND=noninteractive
+# Set up app directory
+APP_DIR="/home/ubuntu/login-app"
+mkdir -p $APP_DIR
+chown ubuntu:ubuntu $APP_DIR
 
-# Wait for network
-until curl -s https://packages.microsoft.com/keys/microsoft.asc; do
-  echo "Waiting for network..."
-  sleep 5
-done
+# Inject DB credentials into .env
+cat <<EOF > $APP_DIR/.env
+DB_USER=admin
+DB_PASS=Passw0rd!23
+DB_HOST=sam-db-instance.cz8eomwyg3n0.ap-south-1.rds.amazonaws.com
+EOF
 
-# Install Apache
-apt update -y
-apt install -y apache2
+chmod 600 $APP_DIR/.env
+chown ubuntu:ubuntu $APP_DIR/.env
 
-# Inject login page directly (replace with actual HTML if needed)
-cat <<EOT > /var/www/html/index.html
+# Deploy frontend (index.html)
+cat <<EOF > $APP_DIR/index.html
 <!DOCTYPE html>
 <html>
 <head><title>Login</title></head>
 <body>
+  <h2>Login Page</h2>
   <form method="POST" action="/login">
     <input type="text" name="username" placeholder="Username" required />
     <input type="password" name="password" placeholder="Password" required />
@@ -58,77 +81,49 @@ cat <<EOT > /var/www/html/index.html
   </form>
 </body>
 </html>
-EOT
+EOF
 
-# Stop Apache to avoid port conflict
-systemctl stop apache2
-
-# Install MSSQL tools
-curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
-curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list | tee /etc/apt/sources.list.d/mssql-release.list
-apt-get update
-ACCEPT_EULA=Y apt-get install -y msodbcsql17 mssql-tools
-
-# Add sqlcmd to PATH for root
-export PATH="$PATH:/opt/mssql-tools/bin"
-
-# Install Node.js
-apt install -y nodejs npm
-
-# Create backend folder
-mkdir -p /home/ubuntu/login-app
-cd /home/ubuntu/login-app
-npm init -y
-npm install express body-parser mssql
-
-# Create server.js
-cat <<EOF > /home/ubuntu/login-app/server.js
+# Sample Node.js backend
+cat <<EOF > $APP_DIR/server.js
 const express = require('express');
 const bodyParser = require('body-parser');
-const sql = require('mssql');
-const path = require('path');
+require('dotenv').config();
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const config = {
-  user: 'admin',
-  password: 'Passw0rd!23',
-  server: 'sam-db-instance.cz8eomwyg3n0.ap-south-1.rds.amazonaws.com',
-  port: 1433,
-  database: 'sam',
-  options: {
-    encrypt: true,
-    trustServerCertificate: true
-  }
-};
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-app.post('/login', async (req, res) => {
+app.post('/login', (req, res) => {
   const { username, password } = req.body;
-
-  try {
-    await sql.connect(config);
-    await sql.query\`INSERT INTO Users (Username, Password) VALUES ('\${username}', '\${password}')\`;
-    res.send('Login data stored successfully!');
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Database error');
-  }
+  console.log(\`Login attempt: \${username}\`);
+  res.send('Login received');
 });
 
-app.listen(80, () => {
-  console.log('Server running on port 80');
+app.listen(3000, () => {
+  console.log('Server running on port 3000');
 });
 EOF
 
-# Move login page to backend folder
-mv /var/www/html/index.html /home/ubuntu/login-app/index.html
+# Install dependencies
+npm install express body-parser dotenv
 
 # Start Node.js app
-node /home/ubuntu/login-app/server.js &
+nohup node $APP_DIR/server.js > $APP_DIR/server.log 2>&1 &
 
+# Configure Nginx to serve index.html and proxy /login
+cat <<EOF > /etc/nginx/sites-available/default
+server {
+    listen 80;
+    server_name _;
 
+    location / {
+        root $APP_DIR;
+        index index.html;
+    }
+
+    location /login {
+        proxy_pass http://localhost:3000;
+    }
+}
+EOF
+
+nginx -t && systemctl reload nginx

@@ -39,6 +39,15 @@ resource "aws_vpc_security_group_ingress_rule" "allow_https_ipv4" {
     to_port     = 443
     ip_protocol    = "tcp"
 }
+
+resource "aws_vpc_security_group_ingress_rule" "allow_nginx" {
+  security_group_id = aws_security_group.sam_sec_group.id
+  cidr_ipv4         = "0.0.0.0/0"
+ 
+    from_port   = 3000
+    to_port     = 3000
+    ip_protocol    = "tcp"
+}
 #creating ingress rule for port 3389 for RDP access
 resource "aws_vpc_security_group_ingress_rule" "allow_RDP_ipv4" {
   security_group_id = aws_security_group.sam_sec_group.id
