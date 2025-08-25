@@ -40,6 +40,39 @@ resource aws_db_instance "sam_db_instance" {
    # Replace with your security group ID
  }
 
+#adding the remote-exec block to execute commands after the instance is created.
+
+# resource "null_resource" "backend_setup" {
+#   count = var.instance_count
+#   depends_on = [aws_instance.sam_instance]
+#   connection {
+#     type        = "ssh"
+#     host        = aws_instance.sam_instance[count.index].public_ip
+#     user        = "ubuntu"
+#     private_key = file("C:/Users/10454/Downloads/sam-key-pair.pem")
+#   }
+
+#   provisioner "remote-exec" {
+#     inline = [
+#       # Install Node.js
+#       "curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -",
+#       "sudo apt-get install -y nodejs",
+
+#       # Create app directory
+#       "mkdir -p ~/app",
+
+#       # Write backend script
+#       "echo '${replace(file("${path.module}/server.js"), "'", "'\\''")}' > ~/app/server.js",
+
+
+#       # Install dependencies
+#       "cd ~/app && npm init -y && npm install express mssql body-parser",
+
+#       # Start backend server
+#       "nohup node ~/app/server.js > ~/app/server.log 2>&1 &"
+#     ]
+#   }
+# }
 
 resource "aws_instance" "sam_instance" {
 count        = var.instance_count
@@ -51,45 +84,105 @@ count        = var.instance_count
   security_groups = var.security_group_id
    associate_public_ip_address = true
    user_data = <<-EOF
-              #!/bin/bash
-              exec > /var/log/user_data.log 2>&1
-              set -e
-              set -x
+#!/bin/bash
+exec > /var/log/user_data.log 2>&1
+set -e
+set -x
 
-              # Update system
-              apt-get update -y
+# Update system
+apt-get update -y
 
-              # Install Apache
-              apt-get install -y apache2
-              systemctl enable apache2
-              systemctl start apache2
+# Install Apache
+apt-get install -y apache2
+systemctl enable apache2
+systemctl start apache2
 
-              # Deploy login page to Apache root
-              cat <<EOL > /var/www/html/index.html
-              <!DOCTYPE html>
-              <html>
-              <head><title>Login</title></head>
-              <body>
-                <h2>Login Page</h2>
-                <form method="POST" action="/submit">
-                  <label>Username:</label><input type="text" name="username"><br>
-                  <label>Password:</label><input type="password" name="password"><br>
-                  <input type="submit" value="Login">
-                </form>
-              </body>
-              </html>
-              EOL
+# Deploy login page to Apache root
+cat <<EOT > /var/www/html/index.html
+<!DOCTYPE html>
+<html>
+<head>
+<title>Login</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  .login-container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    width: 300px;
+  }
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  input[type="text"],
+  input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  input[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  input[type="submit"]:hover {
+    background-color: #0056b3;
+  }
+</style>
+</head>
+<body>
+  <div class="login-container">
+    <h2>Login Page</h2>
+    <form method="POST" action="/submit">
+      <label>Username:</label><input type="text" name="username"><br>
+      <label>Password:</label><input type="password" name="password"><br>
+      <input type="submit" value="Login">
+    </form>
+  </div>
+</body>
+</html>
+EOT
 
-              # Install MSSQL tools
-              curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
-              curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list | tee /etc/apt/sources.list.d/mssql-release.list
-              apt-get update -y
-              ACCEPT_EULA=Y apt-get install -y msodbcsql17 mssql-tools
+# Install MSSQL tools only (not server)
+/usr/bin/curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list | tee /etc/apt/sources.list.d/mssql-release.list
+apt-get update -y
+ACCEPT_EULA=Y apt-get install -y msodbcsql17 mssql-tools
 
-              # Add MSSQL tools to PATH
-              echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> /etc/profile.d/mssql-tools.sh
-              source /etc/profile.d/mssql-tools.sh
-            EOF
+# Add MSSQL tools to PATH
+echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> /etc/profile.d/mssql-tools.sh
+source /etc/profile.d/mssql-tools.sh
+EOF
+connection {
+    type        = "ssh"
+    user        = "ubuntu"
+    private_key = file("C:/Users/10454/Downloads/sam-key-pair.pem") # Replace with your actual key path
+    host        = self.public_ip
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sleep 1080", # Give MSSQL time to boot if installed separately
+      "/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Passw0rd!23' -Q \"IF DB_ID('loginDB') IS NULL CREATE DATABASE SamDB\"",
+      "/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Passw0rd!23' -d loginDB -Q \"IF OBJECT_ID('user') IS NULL CREATE TABLE [user] (id INT IDENTITY(1,1) PRIMARY KEY, username NVARCHAR(100), password NVARCHAR(100))\""
+    ]
+  }
 
 
 

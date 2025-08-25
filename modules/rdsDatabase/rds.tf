@@ -8,7 +8,7 @@ resource "aws_subnet" "Sam_private_subnet" {
 }
 
 resource aws_db_instance "sam_db_instance" {
-   identifier         = "sam-db-instance"
+   identifier         = "sam-db-instance-1-new"
    allocated_storage  = 20
    engine             = "sqlserver-ex"
    engine_version     = "15.00"
