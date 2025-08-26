@@ -92,10 +92,11 @@ set -x
 # Update system
 apt-get update -y
 
-# Install Apache
-apt-get install -y apache2
-systemctl enable apache2
-systemctl start apache2
+# Install Nginx
+apt-get install -y nginx
+systemctl enable nginx
+systemctl start nginx
+
 
 # Deploy login page to Apache root
 cat <<EOT > /var/www/html/index.html
@@ -150,11 +151,15 @@ cat <<EOT > /var/www/html/index.html
   <div class="login-container">
     <h2>Login Page</h2>
     <form method="POST" action="/submit">
-      <label>Username:</label><input type="text" name="username"><br>
-      <label>Password:</label><input type="password" name="password"><br>
+      <label>Username:</label><input type="text" name="username" >
+
+      <label>Password:</label><input type="password" name="password" >
+
       <input type="submit" value="Login">
+    
     </form>
   </div>
+   
 </body>
 </html>
 EOT
@@ -168,21 +173,27 @@ ACCEPT_EULA=Y apt-get install -y msodbcsql17 mssql-tools
 # Add MSSQL tools to PATH
 echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> /etc/profile.d/mssql-tools.sh
 source /etc/profile.d/mssql-tools.sh
-EOF
-connection {
-    type        = "ssh"
-    user        = "ubuntu"
-    private_key = file("C:/Users/10454/Downloads/sam-key-pair.pem") # Replace with your actual key path
-    host        = self.public_ip
-  }
 
-  provisioner "remote-exec" {
-    inline = [
-      "sleep 1080", # Give MSSQL time to boot if installed separately
-      "/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Passw0rd!23' -Q \"IF DB_ID('loginDB') IS NULL CREATE DATABASE SamDB\"",
-      "/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Passw0rd!23' -d loginDB -Q \"IF OBJECT_ID('user') IS NULL CREATE TABLE [user] (id INT IDENTITY(1,1) PRIMARY KEY, username NVARCHAR(100), password NVARCHAR(100))\""
-    ]
-  }
+#waiting for database to be ready
+until /opt/mssql-tools/bin/sqlcmd -S sam-db-instance-new-2.cz8eomwyg3n0.ap-south-1.rds.amazonaws.com,1433 -U admin -P 'Passw0rd!23' -Q "SELECT name FROM sys.databases" > /dev/null 2>&1; do
+    echo "Waiting for RDS SQL Server to be ready..."
+    sleep 10
+done
+
+# Define SQL commands
+cat <<EOF | /opt/mssql-tools/bin/sqlcmd -S sam-db-instance-new-2.cz8eomwyg3n0.ap-south-1.rds.amazonaws.com,1433 -U admin -P 'Passw0rd!23'
+CREATE DATABASE SamDB;
+GO
+USE SamDB;
+GO
+CREATE TABLE Users (
+    ID INT PRIMARY KEY IDENTITY(1,1),
+    Username NVARCHAR(50),
+    Password NVARCHAR(100)
+);
+GO
+EOF
+
 
 
 
