@@ -1,13 +1,13 @@
 output "Sam_ec2_role"{
-  value = aws_iam_role.sam_ec2_role_1.name
+  value = aws_iam_role.sam_ec2_role_2.name
 }
 
 output "Sam_ec2_instance_profile"{
-  value = aws_iam_instance_profile.sam_ec2_instance_profile.name
+  value = aws_iam_instance_profile.sam_ec2_instance_profile_1.name
 }   
 
 output "Sam_bucket_name" {
-  value = aws_s3_bucket.sam_bucket.bucket
+  value = aws_s3_bucket.sam_web_bucket.bucket
 }
 
 output "sam_policy_attached_to_iamRole" {
