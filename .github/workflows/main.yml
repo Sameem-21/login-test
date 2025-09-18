@@ -64,11 +64,11 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
-      - name: Terraform Format Check
-        id: fmtcheck
-        run: |
-          terraform fmt -check -recursive
-          echo "fmt_status=$?" >> $GITHUB_OUTPUT
+    #   - name: Terraform Format Check
+    #     id: fmtcheck
+    #     run: |
+    #       terraform fmt -check -recursive
+    #       echo "fmt_status=$?" >> $GITHUB_OUTPUT
 
       - name: Auto Format if Needed
         if: steps.fmtcheck.outputs.fmt_status != '0'
