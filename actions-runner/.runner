@@ -1,0 +1,11 @@
+﻿{
+  "agentId": 21,
+  "agentName": "self-hosted",
+  "poolId": 1,
+  "poolName": "Default",
+  "serverUrl": "https://pipelinesghubeus11.actions.githubusercontent.com/TyaagQFBS4c87fmtDepiC0clXrSfrSexiMlo4PZvHaMLgl0Th3/",
+  "gitHubUrl": "https://github.com/Sameem-21/login-test",
+  "workFolder": "_work",
+  "useV2Flow": true,
+  "serverUrlV2": "https://broker.actions.githubusercontent.com/"
+}
