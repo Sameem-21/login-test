@@ -13,14 +13,17 @@ provider "aws" {
 }
 # rds creation
 
-resource "aws_db_subnet_group" "Sam_private_subnet_1" {
-  name       = "sam-private-subnet-group_1"
+resource "aws_db_subnet_group" "Sam_private_subnet_new" {
+  name_prefix = "db-subnet-group-"
   subnet_ids = var.subnet_ids
   #vpc_id    = var.vpc_id
 
   tags = {
-    Name = "Sam_private_subnet_group_1"  #it needs multible availibility zones so we are using the subnet_id variable which is a list of subnets.
+    Name ="db-subnet-group"  #it needs multible availibility zones so we are using the subnet_id variable which is a list of subnets.
   }
+   lifecycle {
+    create_before_destroy = true
+   }
 }
 
 resource aws_db_instance "sam_db_instance" {
@@ -35,7 +38,7 @@ resource aws_db_instance "sam_db_instance" {
    skip_final_snapshot = true
    publicly_accessible = true
    storage_type       = "gp2"
-   db_subnet_group_name = aws_db_subnet_group.Sam_private_subnet_1.name
+   db_subnet_group_name = aws_db_subnet_group.Sam_private_subnet_new.name
    vpc_security_group_ids = var.security_group_id
    # Replace with your security group ID
  }
