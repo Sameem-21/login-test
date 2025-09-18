@@ -43,39 +43,7 @@ resource aws_db_instance "sam_db_instance" {
    # Replace with your security group ID
  }
 
-#adding the remote-exec block to execute commands after the instance is created.
 
-# resource "null_resource" "backend_setup" {
-#   count = var.instance_count
-#   depends_on = [aws_instance.sam_instance]
-#   connection {
-#     type        = "ssh"
-#     host        = aws_instance.sam_instance[count.index].public_ip
-#     user        = "ubuntu"
-#     private_key = file("C:/Users/10454/Downloads/sam-key-pair.pem")
-#   }
-
-#   provisioner "remote-exec" {
-#     inline = [
-#       # Install Node.js
-#       "curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -",
-#       "sudo apt-get install -y nodejs",
-
-#       # Create app directory
-#       "mkdir -p ~/app",
-
-#       # Write backend script
-#       "echo '${replace(file("${path.module}/server.js"), "'", "'\\''")}' > ~/app/server.js",
-
-
-#       # Install dependencies
-#       "cd ~/app && npm init -y && npm install express mssql body-parser",
-
-#       # Start backend server
-#       "nohup node ~/app/server.js > ~/app/server.log 2>&1 &"
-#     ]
-#   }
-# }
 
 resource "aws_instance" "sam_instance" {
 count        = var.instance_count
