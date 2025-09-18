@@ -11,7 +11,7 @@ jobs:
         name: terraform workflow
         runs-on: ubuntu-latest
 
-    steps:
+    terraform checkout:
          - name: checkout code from git hub
            uses: actions/checkout@v3 #checkout the code from git hub to make it vailable fr rst steps
 
