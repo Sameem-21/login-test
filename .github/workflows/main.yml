@@ -1,40 +1,40 @@
-name: my workflow to chekc my code
+# name: my workflow to chekc my code
 
-on : 
-    push:
-        branches: 
-           - commit-branch
-    workflow_dispatch:       
-jobs:
+# on : 
+#     push:
+#         branches: 
+#            - commit-branch
+#     workflow_dispatch:       
+# jobs:
 
-    setting-terraform:
-        name: terraform workflow
-        runs-on: ubuntu-latest
+#     setting-terraform:
+#         name: terraform workflow
+#         runs-on: ubuntu-latest
 
-    terraform checkout:
-         - name: checkout code from git hub
-           uses: actions/checkout@v3 #checkout the code from git hub to make it vailable fr rst steps
+#     terraform checkout:
+#          - name: checkout code from git hub
+#            uses: actions/checkout@v3 #checkout the code from git hub to make it vailable fr rst steps
 
-         - name: setup-terraform
-           uses: hashicorp/setup-terraform@v2
-    tfformat:
-         - name: terraform fmt chekc
-           run: terraform fmt -check # fails if my format is bad
-    terraform 1:
-         - name: terraform initiate
-           needs: [tfformat]
-           run: terraform initiate
-         - name: terraform validation
-           run: terraform validate
-    terraform 2:     
-         - name: terraform planning
-           needs: [terraform1]
-           run: terraform plan -out "file"
-    terraform final:     
-         - name: terraform apply
-           needs: [terraform1, terraform2]
-            if: github.ref == 'refs/heads/main'
-           run: terraform apply "file "-auto-approve
+#          - name: setup-terraform
+#            uses: hashicorp/setup-terraform@v2
+#     tfformat:
+#          - name: terraform fmt chekc
+#            run: terraform fmt -check # fails if my format is bad
+#     terraform 1:
+#          - name: terraform initiate
+#            needs: [tfformat]
+#            run: terraform initiate
+#          - name: terraform validation
+#            run: terraform validate
+#     terraform 2:     
+#          - name: terraform planning
+#            needs: [terraform1]
+#            run: terraform plan -out "file"
+#     terraform final:     
+#          - name: terraform apply
+#            needs: [terraform1, terraform2]
+#             if: github.ref == 'refs/heads/main'
+#            run: terraform apply "file "-auto-approve
 
 
       
@@ -44,3 +44,45 @@ jobs:
 
      
 
+name: my workflow to check my code
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  terraform:
+    name: Terraform Workflow
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code from GitHub
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Format Check
+        id: fmtcheck
+        run: |
+          terraform fmt -check -recursive
+          echo "fmt_status=$?" >> $GITHUB_OUTPUT
+
+      - name: Auto Format if Needed
+        if: steps.fmtcheck.outputs.fmt_status != '0'
+        run: terraform fmt -recursive
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
+        run: terraform apply tfplan -auto-approve
