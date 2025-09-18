@@ -1,18 +1,42 @@
 name: my workflow to chekc my code
 
 on : 
-   push:
-       branches: 
+    push:
+        branches: 
            - commit-branch
+    workflow_dispatch:       
 jobs:
 
-   setting-terraform:
+    setting-terraform:
         name: terraform workflow
         runs-on: ubuntu-latest
 
-   steps:
-       -name: checkout code from git hub
-        uses: actions/checkout@v3 #checkout the code from git hub to make it vailable fr rst steps
+    steps:
+       - name: checkout code from git hub
+         uses: actions/checkout@v3 #checkout the code from git hub to make it vailable fr rst steps
+
+       - name: setup-terraform
+         uses: hashicorp/setup-terraform@v2
+    tfformat:
+       - name: terraform fmt chekc
+         run: terraform fmt -check # fails if my format is bad
+    terraform 1:
+       - name: terraform initiate
+         needs: [tfformat]
+         run: terraform initiate
+       - name: terraform validation
+         run: terraform validate
+    terraform 2:     
+       - name: terraform planning
+         needs: [terraform1]
+         run: terraform plan -out "file"
+    terraform final:     
+       - name: terraform apply
+         needs: [terraform1, terraform2]
+         if: github.ref == 'refs/heads/main'
+         run: terraform apply "file "-auto-approve
+
+
       
         
         
