@@ -1,0 +1,22 @@
+name: my workflow to chekc my code
+
+on : 
+   push:
+       branches: 
+           - commit-branch
+jobs:
+
+   setting-terraform:
+        name: terraform workflow
+        runs-on: ubuntu-latest
+
+   steps:
+       -name: checkout code from git hub
+        uses: actions/checkout@v3 #checkout the code from git hub to make it vailable fr rst steps
+      
+        
+        
+           
+
+     
+
