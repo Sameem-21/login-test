@@ -13,7 +13,7 @@ provider "aws" {
 }
 # rds creation
 
-resource "aws_db_subnet_group" "Sam_private_subnet_new" {
+resource "aws_db_subnet_group" "Sam_private_subnet_v2" {
   name_prefix = "db-subnet-group-"
   subnet_ids = var.subnet_ids
   #vpc_id    = var.vpc_id
@@ -38,7 +38,7 @@ resource aws_db_instance "sam_db_instance" {
    skip_final_snapshot = true
    publicly_accessible = true
    storage_type       = "gp2"
-   db_subnet_group_name = aws_db_subnet_group.Sam_private_subnet_new.name
+   db_subnet_group_name = aws_db_subnet_group.Sam_private_subnet_v2.name
    vpc_security_group_ids = var.security_group_id
    # Replace with your security group ID
  }

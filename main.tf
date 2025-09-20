@@ -40,7 +40,7 @@ module "instances" {
   source               = "./modules/instances"
   ami_id               = module.ami.ami_id
   instance_type        = "t3.micro"                      # Replace with your desired instance type
-  key_name             = "sam-key-pair"                  # Replace with your key pair name
+  key_name             = "new-key-pair"                  # Replace with your key pair name
   security_group_id    = [module.security.sam_sec_group] # Replace with your security group ID
   instance_count       = 1
   iam_instance_profile = module.s3bucket.Sam_ec2_instance_profile # instance profile created above

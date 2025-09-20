@@ -235,16 +235,15 @@ curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list | tee /etc/apt
 apt-get update -y
 ACCEPT_EULA=Y apt-get install -y msodbcsql17 mssql-tools
 
-# Add MSSQL tools to PATH
-# Add MSSQL tools to PATH
+# Add MSSQL tools to PATH for future sessions
 echo 'export PATH="$PATH:/opt/mssql-tools/bin"' | sudo tee -a /etc/profile.d/mssql-tools.sh > /dev/null
 source /etc/profile.d/mssql-tools.sh
-
 
 # Wait for RDS SQL Server to be ready (with retry cap)
 MAX_RETRIES=30
 COUNT=0
-until /opt/mssql-tools/bin/sqlcmd -S sam-db-instance-new-3.cz8eomwyg3n0.ap-south-1.rds.amazonaws.com,1433 -U admin -P "Passw0rd!23" -Q "SELECT name FROM sys.databases" > /dev/null 2>&1; do
+until /opt/mssql-tools/bin/sqlcmd -S sam-db-instance-new-3.cz8eomwyg3n0.ap-south-1.rds.amazonaws.com,1433 \
+  -U admin -P "Passw0rd!23" -Q "SELECT name FROM sys.databases" > /dev/null 2>&1; do
   echo "Waiting for RDS SQL Server to be ready..."
   sleep 10
   COUNT=$((COUNT+1))
@@ -274,7 +273,3 @@ BEGIN
 END
 GO
 SQL
-
-echo "SQL execution completed. Output:"
-cat /home/ubuntu/sql_output.log
-
