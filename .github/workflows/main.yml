@@ -83,6 +83,15 @@ jobs:
 
       - name: Terraform Plan
         run: terraform plan -out=tfplan
+      - name: Manual Approval
+        uses: sameem-21/manual-approval-action@v1
+        with: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPROVERS: 'sameem-21'
+          minimum-approvals: 1
+          issue-title: 'Terraform Apply Approval'
+          issue-body: 'Please approve the Terraform Apply step.'
+
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
