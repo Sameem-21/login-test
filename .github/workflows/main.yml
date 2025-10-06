@@ -57,6 +57,7 @@ jobs:
     name: Terraform Workflow
     #runs-on: ubuntu-latest
     runs-on: self-hosted
+    environment: production
 
     steps:
       - name: Checkout code from GitHub
@@ -83,14 +84,10 @@ jobs:
 
       - name: Terraform Plan
         run: terraform plan -out=tfplan
-      - name: Manual Approval
-        uses: Sameem-21/manual-approval@main
-        with: 
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          APPROVERS: 'Sameem-21'
-          minimum-approvals: 1
-          issue-title: 'Terraform Apply Approval'
-          issue-body: 'Please approve the Terraform Apply step.'
+    
+    
+      - name: deploy
+        run : echo "deploying to production"
 
 
       - name: Terraform Apply
