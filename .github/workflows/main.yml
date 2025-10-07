@@ -57,7 +57,7 @@ jobs:
     name: Terraform Workflow
     #runs-on: ubuntu-latest
     runs-on: self-hosted
-    environment: production
+    environment: prod_test
 
     steps:
       - name: Checkout code from GitHub
