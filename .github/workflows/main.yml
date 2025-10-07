@@ -89,7 +89,23 @@ jobs:
       - name: deploy
         run : echo "deploying to production"
 
+  terraform_apply:
+      name: terraform apply
+      needs: [terraform]
+      runs-on: self-hosted
+      environment: prod_test
+      steps:
+        - name: Checkout code from GitHub
+          uses: actions/checkout@v3
 
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/main'
-        run: terraform apply tfplan -auto-approve
+        - name: Setup Terraform
+          uses: hashicorp/setup-terraform@v2
+        
+        - name: terraform restore
+          run: | 
+              cp plan-artifacts/tfplan tfplan
+
+        - name: Terraform Apply
+
+          if: github.ref == 'refs/heads/main'
+          run: terraform apply tfplan -auto-approve
